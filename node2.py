@@ -2,9 +2,7 @@ import zmq
 import time
 import random
 import json
-import sys
 import threading
-import queue
 
 class PaxosNode:
     def __init__(self, node_id, total_nodes):
@@ -20,31 +18,27 @@ class PaxosNode:
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.socket.bind(f"tcp://127.0.0.1:555{node_id}")
-
+        self.send_socket = self.context.socket(zmq.REQ)
+        self.send_socket.connect(f"tcp://127.0.0.1:5551")  # Change the target node_id as needed
 
     def send_message(self, message_type, data=None, target_node_id=None):
-        json_message = json.dumps({"message_type": message_type,"data":data})
+        json_message = json.dumps({"message_type": message_type, "data": data})
         if target_node_id is not None:
-            context = zmq.Context()
-            socket = context.socket(zmq.REQ)
-            socket.connect(f"tcp://127.0.0.1:555{target_node_id}")
-            socket.send_string(json_message)
-            socket.recv_string()
-        else: 
+            self.send_socket.send_string(json_message)
+            self.send_socket.recv_string()
+        else:
             self.socket.send_string(json_message)
 
     def receive_message(self):
         json_message = self.socket.recv_string()
-
-        print("I rec num")
-
         return json.loads(json_message)
-    
+
     def send_value_to_node(self, value, target_node_id):
         self.send_message("value", {"value": value}, target_node_id)
 
     def run(self):
         received_value = None
+        list2 = []
         while True:
             message = self.receive_message()
 
@@ -63,14 +57,16 @@ class PaxosNode:
             print("Te 2")
             print(received_value)
             print(data)
+            list2.append(received_value)
+            print("The list is:")
+            print(list2)
+            self.send_value_to_node(received_value, 1)
             self.send_message("ACK", None)
-            node.send_value_to_node(received_value, 1)
-         
 
 if __name__ == "__main__":
     node_id = 2
     total_nodes = 2
-
+    print("\nNode 2 is Working\n")
     node = PaxosNode(node_id, total_nodes)
 
     # Start a separate thread to run the node's run() method
