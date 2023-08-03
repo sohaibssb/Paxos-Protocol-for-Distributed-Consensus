@@ -9,11 +9,11 @@ class PaxosNode:
         self.node_id = node_id
         self.total_nodes = total_nodes
 
-        self.prepare_n = None
-        self.accepted_n = None
-        self.accepted_value = None
-        self.promised_n = None
-        self.accepted_nack = False
+        #self.prepare_n = None
+        #self.accepted_n = None
+        #self.accepted_value = None
+        #self.promised_n = None
+        #self.accepted_nack = False
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
@@ -39,6 +39,8 @@ class PaxosNode:
 
     def run(self):
         list1 = []
+        i = 0
+        accept = 0
         while True:
             message = self.receive_message()
 
@@ -48,38 +50,78 @@ class PaxosNode:
 
                 if message_type == "value":
                     received_value = data["value"]
-                    print(f"Node {self.node_id} received value: {received_value}")
+                    #print(f"Узел {self.node_id} полученное значение: {received_value}")
 
             # Simulate some work before responding to messages
-            time.sleep(random.uniform(0.1, 0.5))
+            # time.sleep(random.uniform(0.1, 0.5))
 
             # Respond to the received message
-            print("Te 1")
-            print(received_value)
-            print(data)
-            list1.append(received_value)
-            print("The list is")
+            print("\n")
+            print(f"Номер предложения: {proposal}")
+            #print(data)
+            list1.append(proposal)
+            print("\nСписок номеров предложений:")
             print(list1)
+
+            #/////////////////////////////////////////////////////////////////////////////
+            promise = 0
+            npromise = 0
+            iaccept = 0
+            inaccept = 0
+            if i == 0:
+                promise = 1
+                print(f"Узел 1, обещанная стоимость: {proposal}")
+            elif max(list1) == proposal:
+                promise = 1
+                print(f"Узел 1, обещанная стоимость: {proposal}")
+            else:
+                npromise = 1
+                print(f"Узел 1, не обещанная ценность: {proposal}")
+
+            if received_value == 1:
+                iaccept = iaccept + 1
+                print(f"Узел 2, обещанная стоимость: {proposal}")
+            else:
+                inaccept = inaccept + 1
+                print(f"Узел 2, не обещанная ценность: {proposal}")
+
+            if iaccept > inaccept:
+                accept = proposal
+                print("\n")
+                print(f"Номер предложения: {accept} --> Принял")
+                print("\n")
+            else:
+                inaccept = proposal
+                print("\n")
+                print(f"Номер предложения: {inaccept} --> не принимаются")
+                print("\n")
+
+            i = i + 1
+
+            #/////////////////////////////////////////////////////////////////////////////
 
             self.send_message("ACK", None)
 
 if __name__ == "__main__":
     node_id = 1
     total_nodes = 2
-    print("\nNode 1 is Working\n")
+    print("\nУзел 1 работает\n")
     node = PaxosNode(node_id, total_nodes)
 
-    # Start a separate thread to run the node's run() method
     node_thread = threading.Thread(target=node.run)
     node_thread.start()
 
     while True:
-        pp = input("Enter a value (or 'exit' to stop): ")
-        if pp.lower() == 'exit':
-            break
+        try:
+            print("--------------------------------------------------")
+            proposal = int(input("Пожалуйста, введите свои идентификационные номера: "))
+        except ValueError:
+            print("Error !!")
+            print("Пожалуйста, введите только цифры")
+            continue
 
-        pp = int(pp)
-        node.send_value_to_node(pp, 2)
+        proposal = int(proposal)
+        node.send_value_to_node(proposal, 2)
 
     # Wait for the node thread to finish
     node_thread.join()

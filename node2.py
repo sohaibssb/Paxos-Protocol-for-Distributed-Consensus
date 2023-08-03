@@ -9,11 +9,11 @@ class PaxosNode:
         self.node_id = node_id
         self.total_nodes = total_nodes
 
-        self.prepare_n = None
-        self.accepted_n = None
-        self.accepted_value = None
-        self.promised_n = None
-        self.accepted_nack = False
+        #self.prepare_n = None
+        #self.accepted_n = None
+        #self.accepted_value = None
+        #self.promised_n = None
+        #self.accepted_nack = False
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
@@ -39,6 +39,7 @@ class PaxosNode:
     def run(self):
         received_value = None
         list2 = []
+        i = 0
         while True:
             message = self.receive_message()
 
@@ -48,25 +49,49 @@ class PaxosNode:
 
                 if message_type == "value":
                     received_value = data["value"]
-                    print(f"Node {self.node_id} received value: {received_value}")
+                    print(f"Узел {self.node_id} полученное значение: {received_value}")
 
             # Simulate some work before responding to messages
-            time.sleep(random.uniform(0.1, 0.5))
+            #time.sleep(random.uniform(0.1, 0.5))
 
             # Respond to the received message
-            print("Te 2")
-            print(received_value)
-            print(data)
+            #print("\nНомер предложения:")
+            #print(received_value)
+            #print(data)
             list2.append(received_value)
-            print("The list is:")
+            print("\nСписок номеров предложений:")
             print(list2)
-            self.send_value_to_node(received_value, 1)
+            print("\n")
+
+            #/////////////////////////////////////////////////////////////////////////////
+            promise = 0
+            npromise = 0
+
+            if i == 0:
+                promise = 1
+                print(f"Узел 2, обещанная стоимость: {received_value}")
+            elif max(list2) == received_value:
+                promise = 1
+                print(f"Узел 2, обещанная стоимость: {received_value}")
+            else:
+                npromise = 1
+                print(f"Узел 2, не обещанная ценность: {received_value}")
+
+            if promise == 1:
+                self.send_value_to_node(1, 1)
+            else:
+                self.send_value_to_node(0, 1)
+
+            i = i + 1
+            print("\n-------------------------------")
+            #/////////////////////////////////////////////////////////////////////////////
+
             self.send_message("ACK", None)
 
 if __name__ == "__main__":
     node_id = 2
     total_nodes = 2
-    print("\nNode 2 is Working\n")
+    print("\nУзел 2 работает\n")
     node = PaxosNode(node_id, total_nodes)
 
     # Start a separate thread to run the node's run() method
