@@ -8,18 +8,11 @@ class PaxosNode:
     def __init__(self, node_id, total_nodes):
         self.node_id = node_id
         self.total_nodes = total_nodes
-
-        #self.prepare_n = None
-        #self.accepted_n = None
-        #self.accepted_value = None
-        #self.promised_n = None
-        #self.accepted_nack = False
-
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
         self.socket.bind(f"tcp://127.0.0.1:555{node_id}")
         self.send_socket = self.context.socket(zmq.REQ)
-        self.send_socket.connect(f"tcp://127.0.0.1:5551")  # Change the target node_id as needed
+        self.send_socket.connect(f"tcp://127.0.0.1:5551")  
 
     def send_message(self, message_type, data=None, target_node_id=None):
         json_message = json.dumps({"message_type": message_type, "data": data})
@@ -51,13 +44,6 @@ class PaxosNode:
                     received_value = data["value"]
                     print(f"Узел {self.node_id} полученное значение: {received_value}")
 
-            # Simulate some work before responding to messages
-            #time.sleep(random.uniform(0.1, 0.5))
-
-            # Respond to the received message
-            #print("\nНомер предложения:")
-            #print(received_value)
-            #print(data)
             list2.append(received_value)
             print("\nСписок номеров предложений:")
             print(list2)
@@ -94,11 +80,9 @@ if __name__ == "__main__":
     print("\nУзел 2 работает\n")
     node = PaxosNode(node_id, total_nodes)
 
-    # Start a separate thread to run the node's run() method
     node_thread = threading.Thread(target=node.run)
     node_thread.start()
 
-    # Keep the main thread alive to listen for input
     while True:
         try:
             time.sleep(1)
