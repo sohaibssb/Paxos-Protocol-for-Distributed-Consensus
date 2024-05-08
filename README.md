@@ -1,4 +1,4 @@
-# Distributed Consensus with Paxos Protocol
+# Paxos Protocol for Distributed Consensus
 Implement Paxos Consensus Algorithm 
 
 Programmed by Sohaibssb as a part of my master research about "Methods of Syncretization Data in Distribution System" at Bauman University, Moscow. Summer 2023.
