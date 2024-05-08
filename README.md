@@ -1,7 +1,7 @@
-# Paxos_Algorithm
+# Distributed Consensus with Paxos Protocol
 Implement Paxos Consensus Algorithm 
 
-Programmed by Sohaibssb as a part of my master research about "Methods of Syncretization Data in Distribution System" at Bauman University, Moscow. Start in Summer 28/7/2023.
+Programmed by Sohaibssb as a part of my master research about "Methods of Syncretization Data in Distribution System" at Bauman University, Moscow. Summer 2023.
 
 ------------------
 
